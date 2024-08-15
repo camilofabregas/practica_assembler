@@ -1,0 +1,15 @@
+(ARCTools Version 2.1.2)
+ HexLoc     DecLoc    MachWord   Label        Instruction                Comment
+                                              .org 2048                  
+00000800  0000002048  00000003  X:                                       
+00000804  0000002052  00000005  Y:                                       
+00000808  0000002056            main:                                    
+0000080c  0000002060  c2002800                ld [2048], %r1             !Cargo X en r1
+00000810  0000002064  c4002804                ld [2052], %r2             !Cargo Y en r2
+00000814  0000002068  c4202800                st %r2, [2048]             !Piso X con r2
+00000818  0000002072  c2202804                st %r1, [2052]             !Piso Y con r1
+
+--- Symbol Table ---
+main: 2056
+Y: 2052
+X: 2048

@@ -1,0 +1,49 @@
+(ARCTools Version 2.1.2)
+ HexLoc     DecLoc    MachWord   Label        Instruction                Comment
+                                              .org 2048                  
+00000800  0000002048  00000001  X:                                       
+00000804  0000002052  00000000  Y:                                       
+00000808  0000002056            main:                                    
+0000080c  0000002060  c2002800                ld [2048], %r1             
+00000810  0000002064  a003c000                add %r15, %r0, %r16        
+00000814  0000002068  8a004000                add %r1, %r0, %r5          !Cargo X en r5 para chequear rango.
+00000818  0000002072  8c00200a                add %r0, 10, %r6           !Cargo 10 en r6 para chequear rango.
+0000081c  0000002076  84004000                add %r1, %r0, %r2          !Contador factorial. 
+00000820  0000002080  40000003                call 3                     
+00000824  0000002084  c2202804                st %r1, [2052]             
+00000828  0000002088  81c42004                jmpl %r16, 4, %r0          
+0000082c  0000002092            chequear_rango:                             
+00000830  0000002096  8a817fff                addcc %r5, -1, %r5         
+00000834  0000002100  02800004                be 4                       !Si X se hizo 0 antes que 10, está en rango. Calculo factorial.
+00000838  0000002104  8c81bfff                addcc %r6, -1, %r6         
+0000083c  0000002108  02800011                be 17                      !Si 10 se hizo 0 antes que X, está fuera de rango.
+00000840  0000002112  10bffffb                ba -5                      !Loop si no se cumple ninguna de las dos.
+00000844  0000002116            factorial:                               
+00000848  0000002120  8480bfff                addcc %r2, -1, %r2         
+0000084c  0000002124  0280000b                be 11                      
+00000850  0000002128  8c008000                add %r2, %r0, %r6          !Contador multiplicar.
+00000854  0000002132            multiplicar:                             
+00000858  0000002136  86004003                add %r1, %r3, %r3          
+0000085c  0000002140  8c81bfff                addcc %r6, -1, %r6         
+00000860  0000002144  02800002                be 2                       
+00000864  0000002148  10bffffc                ba -4                      
+00000868  0000002152            terminar_multiplicar:                             
+0000086c  0000002156  8200c000                add %r3, %r0, %r1          
+00000870  0000002160  86002000                add %r0, 0, %r3            
+00000874  0000002164  10bffff4                ba -12                     
+00000878  0000002168            terminar_factorial:                             
+0000087c  0000002172  81c3e004                jmpl %r15, 4, %r0          
+00000880  0000002176            fuera_de_rango:                             
+00000884  0000002180  84003fff                add %r0, -1, %r2           
+00000888  0000002184  81c3e004                jmpl %r15, 4, %r0          
+
+--- Symbol Table ---
+factorial: 2116
+Y: 2052
+terminar_multiplicar: 2152
+X: 2048
+terminar_factorial: 2168
+main: 2056
+chequear_rango: 2092
+multiplicar: 2132
+fuera_de_rango: 2176

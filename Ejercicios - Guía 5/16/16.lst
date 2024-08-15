@@ -1,0 +1,104 @@
+(ARCTools Version 2.1.2)
+ HexLoc     DecLoc    MachWord   Label        Instruction                Comment
+                                              .org 2048                  
+00000800  0000002048  00000004  X:                                       
+00000804  0000002052  0000004b  Y:                                       
+00000808  0000002056  00000000  Z:                                       
+0000080c  0000002060            main:                                    
+00000810  0000002064  c2002800                ld [2048], %r1             
+00000814  0000002068  c4002804                ld [2052], %r2             
+00000818  0000002072                          push %r2                   
+00000818  0000002072  9c03bffc                add %r14, -4, %r14         
+0000081c  0000002076  c4238000                st %r2, %r14               
+00000820  0000002080                          push %r1                   
+00000820  0000002080  9c03bffc                add %r14, -4, %r14         
+00000824  0000002084  c2238000                st %r1, %r14               
+00000828  0000002088  a003c000                add %r15, %r0, %r16        
+0000082c  0000002092  40000005                call 5                     
+00000830  0000002096                          pop %r3                    
+00000830  0000002096  c6038000                ld %r14, %r3               
+00000834  0000002100  9c03a004                add %r14, 4, %r14          
+00000838  0000002104  c6202808                st %r3, [2056]             
+0000083c  0000002108  81c42004                jmpl %r16, 4, %r0          
+                                                                         ! r1 	-> guarda el primer numero
+                                                                         ! r2 	-> guarda el segundo numero
+                                                                         ! r5 	-> se utiliza para analizar signo, exponente, mantisa del primer numero
+                                                                         ! r6 	-> se utiliza para analizar signo, exponente, mantisa del segundo numero
+00000840  0000002112            comparar_pto_flotante:                             
+00000844  0000002116                          pop %r1                    !Obtengo el primer numero en r1
+00000844  0000002116  c2038000                ld %r14, %r1               
+00000848  0000002120  9c03a004                add %r14, 4, %r14          
+0000084c  0000002124                          pop %r2                    !Obtengo el segundo numero en r2
+0000084c  0000002124  c4038000                ld %r14, %r2               
+00000850  0000002128  9c03a004                add %r14, 4, %r14          
+00000854  0000002132                          obtener_signo %r1, %r5     
+00000854  0000002132  8b30601f                srl %r1, 31, %r5           !Consigo el signo con un desplazamiento a derecha
+00000858  0000002136                          obtener_signo %r2, %r6     
+00000858  0000002136  8d30a01f                srl %r2, 31, %r6           !Consigo el signo con un desplazamiento a derecha
+0000085c  0000002140  80a14006                subcc %r5, %r6, %r0        !Los resto para ver si uno ya es mayor que el otro
+00000860  0000002144  02800006                be 6                       !Si da 0 entonces son iguales los signos
+00000864  0000002148  10800001                ba 1                       !Si no da 0 entonces no son iguales los signos
+00000868  0000002152            signos_distintos:                             
+0000086c  0000002156  80814000                addcc %r5, %r0, %r0        
+00000870  0000002160  0280001b                be 27                      !Si r3 es positivo entonces r4 es negativo
+00000874  0000002164  1080001f                ba 31                      !Si r3 es negativo entonces r4 es positivo
+00000878  0000002168            signos_iguales:                             !Si tienen el mismo signo, tengo que seguir analizando. Primero el exponente y despues la mantisa si es necesario
+0000087c  0000002172                          obtener_exponente %r1, %r5  
+0000087c  0000002172  0b01fe00                sethi 130560, %r5          !Cargo con 0111 1111 1000 0000 0000 0000 0000 0000 para quedarme con el exponente
+00000880  0000002176  8a084005                and %r1, %r5, %r5          
+00000884  0000002180  8b316017                srl %r5, 23, %r5           
+00000888  0000002184                          obtener_exponente %r2, %r6  
+00000888  0000002184  0d01fe00                sethi 130560, %r6          !Cargo con 0111 1111 1000 0000 0000 0000 0000 0000 para quedarme con el exponente
+0000088c  0000002188  8c088006                and %r2, %r6, %r6          
+00000890  0000002192  8d31a017                srl %r6, 23, %r6           
+00000894  0000002196  80a14006                subcc %r5, %r6, %r0        !Los resto para ver si uno ya es mayor que el otro
+00000898  0000002200  02800006                be 6                       
+0000089c  0000002204  10800001                ba 1                       
+000008a0  0000002208            exponentes_distintos:                             
+000008a4  0000002212  80a14006                subcc %r5, %r6, %r0        !Si r3 es mayor, el resultado va a ser positivo
+000008a8  0000002216  1c80000d                bpos 13                    
+000008ac  0000002220  10800011                ba 17                      
+000008b0  0000002224            exponentes_iguales:                             !Caso ambos exponentes iguales
+000008b4  0000002228                          obtener_mantisa %r1, %r5   
+000008b4  0000002228  0b001fff                sethi 8191, %r5            !Cargo con 0000 0000 0111 1111 1111 1111 1111 1111 para quedarme con la mantisa
+000008b8  0000002232  8a0162ff                add %r5, 767, %r5          
+000008bc  0000002236  8a084005                and %r1, %r5, %r5          
+000008c0  0000002240                          obtener_mantisa %r2, %r6   
+000008c0  0000002240  0d001fff                sethi 8191, %r6            !Cargo con 0000 0000 0111 1111 1111 1111 1111 1111 para quedarme con la mantisa
+000008c4  0000002244  8c01a2ff                add %r6, 767, %r6          
+000008c8  0000002248  8c088006                and %r2, %r6, %r6          
+000008cc  0000002252  80a14006                subcc %r5, %r6, %r0        !Resto las mantisas
+000008d0  0000002256  0280000d                be 13                      !Si da 0 significa que los numeros son iguales
+000008d4  0000002260  0c800007                bneg 7                     ! r3 - r4 < 0 ---> r3 < r4
+000008d8  0000002264  10800001                ba 1                       ! r3 - r4 > 0 ---> r3 > r4
+000008dc  0000002268            primero_mayor:                             
+000008e0  0000002272  86002001                add %r0, 1, %r3            !Pongo un 1 en r1
+000008e4  0000002276                          push %r3                   !Hago push del 1 en la pila
+000008e4  0000002276  9c03bffc                add %r14, -4, %r14         
+000008e8  0000002280  c6238000                st %r3, %r14               
+000008ec  0000002284  81c3e004                jmpl %r15, 4, %r0          
+000008f0  0000002288            segundo_mayor:                             
+000008f4  0000002292  86002002                add %r0, 2, %r3            !Pongo un 2 en r1
+000008f8  0000002296                          push %r3                   !Hago push del 2 en la pila
+000008f8  0000002296  9c03bffc                add %r14, -4, %r14         
+000008fc  0000002300  c6238000                st %r3, %r14               
+00000900  0000002304  81c3e004                jmpl %r15, 4, %r0          
+00000904  0000002308            iguales:                                 
+00000908  0000002312                          push %r0                   !Se devuelve 0 ya que los numeros son iguales
+00000908  0000002312  9c03bffc                add %r14, -4, %r14         
+0000090c  0000002316  c0238000                st %r0, %r14               
+00000910  0000002320  81c3e004                jmpl %r15, 4, %r0          
+
+--- Symbol Table ---
+Z: 2056
+Y: 2052
+X: 2048
+iguales: 2308
+primero_mayor: 2268
+main: 2060
+segundo_mayor: 2288
+signos_iguales: 2168
+comparar_pto_flotante: 2112
+signos_distintos: 2152
+exponentes_distintos: 2208
+exponentes_iguales: 2224
